@@ -12,7 +12,6 @@ import (
 )
 
 const traceIDKey key = 911
-const handlerNamePrefix = "handling_request_"
 
 type tracingOptions struct {
 	tracer opentracing.Tracer
