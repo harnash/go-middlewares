@@ -1,0 +1,23 @@
+sudo: false
+language: go
+matrix:
+  include:
+    - go: "1.12"
+    - go: master
+  allow_failures:
+    - go: master
+install:
+  - go get github.com/mattn/goveralls
+  - go get github.com/modocache/gover
+  - curl -L https://git.io/vp6lP | sh -s -- -b $HOME/gopath/bin -d latest    # Install gometalinter
+script:
+  - if ([ "$SEND_COVERAGE" == "1" ]); then make test-cover; else make test; fi
+  - make fmt-check
+  - make lint
+  - make test
+after_success:
+  - if ([ "$SEND_COVERAGE" == "1" ]); then gover && $HOME/gopath/bin/goveralls -service=travis-ci -coverprofile=gover.coverprofile; fi
+os:
+  - linux
+notifications:
+  email: false
