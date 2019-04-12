@@ -3,7 +3,6 @@ package middlewares
 import (
 	"net/http"
 
-	"github.com/go-playground/pure"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
