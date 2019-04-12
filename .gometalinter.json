@@ -1,8 +1,7 @@
 
 {
   "Fast": true,
-  "Vendor": true,
   "Test": true,
   "Deadline": "120s",
-  "Disable": ["gotype"]
+  "Disable": ["gotype", "gotype-x"]
 }
