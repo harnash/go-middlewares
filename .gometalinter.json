@@ -3,6 +3,5 @@
   "Fast": true,
   "Test": true,
   "Deadline": "120s",
-  "Debug": true,
-  "Enable": ["errcheck", "vet", "vetshadow", "deadcode", "gocyclo", "varcheck", "structcheck", "staticcheck", "mailigned", "golint"]
+  "Disable": ["gotype"]
 }
