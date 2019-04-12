@@ -16,9 +16,9 @@ const handlerNamePrefix = "handling_request_"
 
 type tracingOptions struct {
 	tracer opentracing.Tracer
-	baggage []stringBaggageName
-	tags []stringTagName
-	logs []stringLogName
+	baggage map[stringBaggageName]string
+	tags map[stringTagName]string
+	logs map[stringLogName]string
 	handlerPrefix string
 	handlerName string
 }
@@ -33,21 +33,21 @@ func WithTracer(tracer opentracing.Tracer) TracingOption {
 	})
 }
 
-func WithBaggage(baggage []stringBaggageName) TracingOption {
+func WithBaggage(name stringBaggageName, value string) TracingOption {
 	return TracingOption(func(o *tracingOptions) {
-		o.baggage = baggage
+		o.baggage[name] = value
 	})
 }
 
-func WithTags(tags []stringTagName) TracingOption {
+func WithTags(name stringTagName, value string) TracingOption {
 	return TracingOption(func(o *tracingOptions) {
-		o.tags = tags
+		o.tags[name] = value
 	})
 }
 
-func WithLogs(logs []stringLogName) TracingOption {
+func WithLogs(name stringLogName, value string) TracingOption {
 	return TracingOption(func(o *tracingOptions) {
-		o.logs = logs
+		o.logs[name] = value
 	})
 }
 
@@ -117,7 +117,17 @@ func Traced(options ...TracingOption) Middleware {
 			ext.HTTPMethod.Set(span, r.Method)
 			ext.HTTPUrl.Set(span, r.URL.Path)
 
-			//TODO: set some span tags/baggage/log items here
+			for key, val := range o.baggage {
+				key.Set(span, val)
+			}
+
+			for key, val := range o.tags {
+				key.Set(span, val)
+			}
+
+			for key, val := range o.logs {
+				key.Set(span, val)
+			}
 
 			defer span.Finish()
 
