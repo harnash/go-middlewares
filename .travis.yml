@@ -10,6 +10,7 @@ install:
   - go get github.com/mattn/goveralls
   - go get github.com/modocache/gover
   - curl -L https://git.io/vp6lP | sh -s -- -b $HOME/gopath/bin -d latest    # Install gometalinter
+  - go mod download
 script:
   - if ([ "$SEND_COVERAGE" == "1" ]); then make test-cover; else make test; fi
   - make lint
