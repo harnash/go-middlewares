@@ -92,10 +92,10 @@ run: $(BINARY)
 	@$(BINARY)
 
 test: vet $(GO_GINKGO)
-	@HELIOS_DATA_DIR=$(ROOT_DIR)data/ $(GO_GINKGO) -r -randomizeAllSpecs -randomizeSuites -failOnPending -trace -race -keepGoing -flakeAttempts 2
+	$(GO_GINKGO) -r -randomizeAllSpecs -randomizeSuites -failOnPending -trace -race -keepGoing -flakeAttempts 2
 
 test-cover: $(GO_COV) $(GO_COV_XML) $(GO_GINKGO) $(GO_GOVER)
-	@HELIOS_DATA_DIR=$(ROOT_DIR)data/ $(GO_GINKGO) -r -randomizeAllSpecs -randomizeSuites -failOnPending -cover -trace --race -keepGoing
+	$(GO_GINKGO) -r -randomizeAllSpecs -randomizeSuites -failOnPending -cover -trace --race -keepGoing
 	@gover
 	@gocov convert gover.coverprofile | gocov-xml > coverage.xml
 
