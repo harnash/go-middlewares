@@ -12,7 +12,6 @@ install:
   - curl -L https://git.io/vp6lP | sh -s -- -b $HOME/gopath/bin -d latest    # Install gometalinter
 script:
   - if ([ "$SEND_COVERAGE" == "1" ]); then make test-cover; else make test; fi
-  - make fmt-check
   - make lint
   - make test
 after_success:
