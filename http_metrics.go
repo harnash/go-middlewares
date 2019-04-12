@@ -12,6 +12,7 @@ type statusRecorder struct {
 	status int
 }
 
+//WriteHeader will capture http status code returned/set by the http.Handler
 func (rec *statusRecorder) WriteHeader(code int) {
 	rec.status = code
 	rec.ResponseWriter.WriteHeader(code)
@@ -92,6 +93,7 @@ func (s *HTTPStats) Collect(in chan<- prometheus.Metric) {
 	s.handlerStatuses.Collect(in)
 }
 
+//InstrumentHandler will register prometheus metrics on a given http.Handler
 func (s HTTPStats) InstrumentHandler(handlerName string, next http.Handler) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		d := statusRecorder{w, 200}

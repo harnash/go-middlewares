@@ -22,7 +22,7 @@ type tracingOptions struct {
 	handlerName string
 }
 
-// Option represents a logger option.
+// TracingOption represents a logger option.
 type TracingOption func(*tracingOptions)
 
 // WithTracer adds list of headers that should be added to the logger
@@ -32,30 +32,36 @@ func WithTracer(tracer opentracing.Tracer) TracingOption {
 	})
 }
 
+// WithBaggage will set custom baggage to the span created by middleware
 func WithBaggage(name stringBaggageName, value string) TracingOption {
 	return TracingOption(func(o *tracingOptions) {
 		o.baggage[name] = value
 	})
 }
 
+// WithTags will add custom tags tp the span create by middleware
 func WithTags(name stringTagName, value string) TracingOption {
 	return TracingOption(func(o *tracingOptions) {
 		o.tags[name] = value
 	})
 }
 
+// WithLogs will add custom log to the span create by middleware
 func WithLogs(name stringLogName, value string) TracingOption {
 	return TracingOption(func(o *tracingOptions) {
 		o.logs[name] = value
 	})
 }
 
+// WithName will define a handler name (used in span operation name) for the span created by the middleware
+// Default is derived from the function name if http.Handler being wrapped
 func WithName(name string) TracingOption {
 	return TracingOption(func(o *tracingOptions) {
 		o.handlerName = name
 	})
 }
 
+// WithNamePrefix will define prefix for a operation name that is being created by middleware
 func WithNamePrefix(prefix string) TracingOption {
 	return TracingOption(func(o *tracingOptions) {
 		o.handlerPrefix = prefix
@@ -66,18 +72,21 @@ type stringBaggageName string
 type stringTagName string
 type stringLogName string
 
+// Set will set the value of a baggage in the span
 func (name stringBaggageName) Set(span opentracing.Span, value string) {
 	if len(value) > 0 {
 		span.SetBaggageItem(string(name), value)
 	}
 }
 
+// Set will set the value of a tag in the span
 func (name stringTagName) Set(span opentracing.Span, value string) {
 	if len(value) > 0 {
 		span.SetTag(string(name), value)
 	}
 }
 
+// Set will set the value of a log in the span
 func (name stringLogName) Set(span opentracing.Span, value string) {
 	if len(value) > 0 {
 		span.LogKV(string(name), value)
@@ -94,7 +103,7 @@ func newTracingOptions(options ...TracingOption) *tracingOptions {
 	return opts
 }
 
-//Traced is a middleware that adds OpenTracing spans to the current request context and sets some sane span tags
+// Traced is a middleware that adds OpenTracing spans to the current request context and sets some sane span tags
 func Traced(options ...TracingOption) Middleware {
 	fn := func(h http.Handler) http.Handler {
 		o := newTracingOptions(options...)

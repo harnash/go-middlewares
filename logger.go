@@ -13,6 +13,7 @@ type key int
 
 const loggerIDKey key = 119
 
+// LogGetter is function that allows injecting custom logger into the middleware
 type LogGetter func() (*zap.SugaredLogger, error)
 
 type loggerOptions struct {
@@ -20,6 +21,7 @@ type loggerOptions struct {
 	logGetter LogGetter
 }
 
+// DefaultLogGetter defines default log getter for middleware
 func DefaultLogGetter() (*zap.SugaredLogger, error) {
 	logger, err := zap.NewProductionConfig().Build()
 	if err != nil {
@@ -55,7 +57,7 @@ func newLoggerOptions(options ...LoggerOption) *loggerOptions {
 	return opts
 }
 
-//LoggerInContext is a middleware that will inject standard logger instance into the context which can be used for
+// LoggerInContext is a middleware that will inject standard logger instance into the context which can be used for
 // per-request logging
 func LoggerInContext(options ...LoggerOption) Middleware {
 	fn := func(h http.Handler) http.Handler {
@@ -80,17 +82,17 @@ func LoggerInContext(options ...LoggerOption) Middleware {
 	return fn
 }
 
-//LoggerFromRequest will return current logger embedded in the given request object
+// LoggerFromRequest will return current logger embedded in the given request object
 func LoggerFromRequest(r *http.Request) *zap.SugaredLogger {
 	return LoggerFromContext(r.Context())
 }
 
-//LoggerFromContext will return current logger from the given context.Context object
+// LoggerFromContext will return current logger from the given context.Context object
 func LoggerFromContext(ctx context.Context) *zap.SugaredLogger {
 	return ctx.Value(loggerIDKey).(*zap.SugaredLogger)
 }
 
-//AddLoggerToContext adds given logger to the context.Context and returns new context
+// AddLoggerToContext adds given logger to the context.Context and returns new context
 func AddLoggerToContext(ctx context.Context, logger *zap.SugaredLogger) context.Context {
 	return context.WithValue(ctx, loggerIDKey, logger)
 }
