@@ -6,6 +6,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"testing"
 )
@@ -13,6 +14,7 @@ import (
 func TestBasicTracing(t *testing.T) {
 	httpStats := NewHTTPStats()
 	tracer := mocktracer.New()
+	defer tracer.Reset()
 	err := prometheus.DefaultRegisterer.Register(httpStats)
 	assert.NoError(t, err, "error while registering HTTPStats collector")
 	defer prometheus.DefaultRegisterer.Unregister(httpStats)
@@ -30,9 +32,54 @@ func TestBasicTracing(t *testing.T) {
 	assert.Len(t, tracer.FinishedSpans(), 1, "did not register any span")
 }
 
+func TestTracingClientHeaders(t *testing.T) {
+	httpStats := NewHTTPStats()
+	tracer := mocktracer.New()
+	defer tracer.Reset()
+	err := prometheus.DefaultRegisterer.Register(httpStats)
+	assert.NoError(t, err, "error while registering HTTPStats collector")
+	defer prometheus.DefaultRegisterer.Unregister(httpStats)
+
+	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		span := opentracing.SpanFromContext(r.Context())
+		assert.NotNil(t, span, "could not get span from the context")
+		w.WriteHeader(http.StatusOK)
+	})
+
+	handler := Traced(WithTracer(tracer), WithName("test"), WithNamePrefix("handler_"))(testHandler)
+
+	srv := httptest.NewServer(handler)
+	defer srv.Close()
+
+	client := srv.Client()
+	req, err := http.NewRequest("GET", srv.URL, nil)
+	if assert.NoError(t, err, "could not create client request") {
+		// prepare the headers
+		outerSpan := tracer.StartSpan("outer_span")
+		err = opentracing.GlobalTracer().Inject(
+			outerSpan.Context(),
+			opentracing.HTTPHeaders,
+			opentracing.HTTPHeadersCarrier(req.Header),
+		)
+		if assert.NoError(t, err, "error injecting tracing headers") {
+			resp, err := client.Do(req)
+			outerSpan.Finish()
+			if assert.NoError(t, err, "error making HTTP request") {
+				assert.Equal(t, http.StatusOK, resp.StatusCode, "invalid HTTP status code")
+				spans := tracer.FinishedSpans()
+				if assert.Len(t, spans, 2, "not all spans were registered") {
+					assert.Equal(t, "handler_test", spans[0].OperationName, "outer span not found")
+					assert.Equal(t, "outer_span", spans[1].OperationName, "handler span not found")
+				}
+			}
+		}
+	}
+}
+
 func TestTracingBaggage(t *testing.T) {
 	httpStats := NewHTTPStats()
 	tracer := mocktracer.New()
+	defer tracer.Reset()
 	err := prometheus.DefaultRegisterer.Register(httpStats)
 	assert.NoError(t, err, "error while registering HTTPStats collector")
 	defer prometheus.DefaultRegisterer.Unregister(httpStats)
@@ -56,6 +103,7 @@ func TestTracingBaggage(t *testing.T) {
 func TestTracingLogging(t *testing.T) {
 	httpStats := NewHTTPStats()
 	tracer := mocktracer.New()
+	defer tracer.Reset()
 	err := prometheus.DefaultRegisterer.Register(httpStats)
 	assert.NoError(t, err, "error while registering HTTPStats collector")
 	defer prometheus.DefaultRegisterer.Unregister(httpStats)
