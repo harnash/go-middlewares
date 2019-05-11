@@ -89,7 +89,11 @@ func LoggerFromRequest(r *http.Request) *zap.SugaredLogger {
 
 // LoggerFromContext will return current logger from the given context.Context object
 func LoggerFromContext(ctx context.Context) *zap.SugaredLogger {
-	return ctx.Value(loggerIDKey).(*zap.SugaredLogger)
+	logger := ctx.Value(loggerIDKey)
+	if logger == nil {
+		return nil
+	}
+	return logger.(*zap.SugaredLogger)
 }
 
 // AddLoggerToContext adds given logger to the context.Context and returns new context

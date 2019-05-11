@@ -22,12 +22,12 @@ func NewRecover() Recover {
 }
 
 // Describe implements prometheus Collector interface.
-func (rc *Recover) Describe(in chan<- *prometheus.Desc) {
+func (rc Recover) Describe(in chan<- *prometheus.Desc) {
 	rc.panicCaught.Describe(in)
 }
 
 // Collect implements prometheus Collector interface.
-func (rc *Recover) Collect(in chan<- prometheus.Metric) {
+func (rc Recover) Collect(in chan<- prometheus.Metric) {
 	rc.panicCaught.Collect(in)
 }
 
@@ -39,7 +39,9 @@ func (rc Recover) Instrument() Middleware {
 			defer func() {
 				if err := recover(); err != nil {
 					rc.panicCaught.Inc()
-					logger.With("err", err).Error("panic during request handling")
+					if logger != nil {
+						logger.With("err", err).Error("panic during request handling")
+					}
 					http.Error(w, "500 - Internal Server Error", http.StatusInternalServerError)
 				}
 			}()
