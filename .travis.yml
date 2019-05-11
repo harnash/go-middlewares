@@ -7,7 +7,9 @@ matrix:
     - go: master
   allow_failures:
     - go: master
-env: GO111MODULE=on
+env:
+  global:
+    - GO111MODULE=on
 install:
   - go get github.com/mattn/goveralls
   - go get github.com/modocache/gover
