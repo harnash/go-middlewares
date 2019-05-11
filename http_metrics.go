@@ -72,7 +72,7 @@ func NewHTTPStats() HTTPStats {
 }
 
 // Describe implements prometheus Collector interface.
-func (s *HTTPStats) Describe(in chan<- *prometheus.Desc) {
+func (s HTTPStats) Describe(in chan<- *prometheus.Desc) {
 	s.duration.Describe(in)
 	s.totalRequests.Describe(in)
 	s.requestSize.Describe(in)
@@ -83,7 +83,7 @@ func (s *HTTPStats) Describe(in chan<- *prometheus.Desc) {
 }
 
 // Collect implements prometheus Collector interface.
-func (s *HTTPStats) Collect(in chan<- prometheus.Metric) {
+func (s HTTPStats) Collect(in chan<- prometheus.Metric) {
 	s.duration.Collect(in)
 	s.totalRequests.Collect(in)
 	s.requestSize.Collect(in)
@@ -93,8 +93,8 @@ func (s *HTTPStats) Collect(in chan<- prometheus.Metric) {
 	s.handlerStatuses.Collect(in)
 }
 
-//InstrumentHandler will register prometheus metrics on a given http.Handler
-func (s HTTPStats) InstrumentHandler(handlerName string, next http.Handler) http.HandlerFunc {
+//instrumentPrometheus will register prometheus metrics on a given http.Handler
+func (s HTTPStats) instrumentPrometheus(handlerName string, next http.Handler) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		d := statusRecorder{w, 200}
 		next.ServeHTTP(&d, r)
@@ -131,7 +131,7 @@ func (s HTTPStats) Instrument(name string, h http.Handler) http.Handler {
 		wrapped = promhttp.InstrumentHandlerDuration(s.handlerDuration.MustCurryWith(prometheus.Labels{"handler_name": name}), wrapped)
 		wrapped = promhttp.InstrumentHandlerRequestSize(s.requestSize, wrapped)
 		wrapped = promhttp.InstrumentHandlerTimeToWriteHeader(s.timeToWrite, wrapped)
-		wrapped = s.InstrumentHandler(name, wrapped)
+		wrapped = s.instrumentPrometheus(name, wrapped)
 
 		wrapped.ServeHTTP(w, r)
 	})
