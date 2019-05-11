@@ -3,6 +3,7 @@ language: go
 matrix:
   include:
     - go: "1.12"
+      env: SEND_COVERAGE=1
     - go: master
   allow_failures:
     - go: master
