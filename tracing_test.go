@@ -81,3 +81,31 @@ func TestTracingLogging(t *testing.T) {
 		}
 	}
 }
+
+func TestTracingTag(t *testing.T) {
+	httpStats := NewHTTPStats()
+	tracer := mocktracer.New()
+	err := prometheus.DefaultRegisterer.Register(httpStats)
+	assert.NoError(t, err, "error while registering HTTPStats collector")
+	defer prometheus.DefaultRegisterer.Unregister(httpStats)
+
+	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		span := opentracing.SpanFromContext(r.Context())
+		assert.NotNil(t, span, "could not get span from the context")
+		w.WriteHeader(http.StatusOK)
+	})
+
+	handler := Traced(WithTracer(tracer), WithTags("some_tag", "localtest"))(testHandler)
+
+	// quite indirect tracing test (see: testHandler for details)
+	assert.HTTPSuccess(t, handler.ServeHTTP, "GET", "/", url.Values{})
+	if assert.Len(t, tracer.FinishedSpans(), 1, "did not register any span") {
+		span := tracer.FinishedSpans()[0]
+		if assert.NotEmpty(t, span.Tags(), "invalid or missing tags") {
+			tags := span.Tags()
+			if assert.Contains(t, tags, "some_tag", "missing tag") {
+				assert.Equal(t, "localtest", tags["some_tag"], "invalid tag value")
+			}
+		}
+	}
+}
