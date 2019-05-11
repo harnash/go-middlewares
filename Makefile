@@ -73,7 +73,7 @@ $(GO_GOVER):
 	go get github.com/modocache/gover
 
 $(GO_COV):
-	go get github.com/axw/gocov
+	go get github.com/axw/gocov/gocov
 
 $(GO_COV_XML):
 	go get github.com/t-yuki/gocov-xml
