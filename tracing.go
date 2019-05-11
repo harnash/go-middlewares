@@ -95,7 +95,11 @@ func (name stringLogName) Set(span opentracing.Span, value string) {
 
 // newTracingOptions takes functional options and returns options.
 func newTracingOptions(options ...TracingOption) *tracingOptions {
-	opts := &tracingOptions{}
+	opts := &tracingOptions{
+		baggage: map[stringBaggageName]string{},
+		tags: map[stringTagName]string{},
+		logs: map[stringLogName]string{},
+	}
 
 	for _, o := range options {
 		o(opts)
