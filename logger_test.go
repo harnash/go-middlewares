@@ -47,7 +47,7 @@ func TestLoggerWithCustomLogger(t *testing.T) {
 
 	err := logger.Sync()
 	assert.NoError(t, err, "error syncing logger")
-	if assert.Equal(t, logs.Len(), 1, "log not emitted to a custom logger") {
+	if assert.Equal(t, 1, logs.Len(), "log not emitted to a custom logger") {
 		logEntry := logs.TakeAll()[0]
 		assert.Equal(t, "some_test_massage_346#@$%^", logEntry.Message, "no custom log message found")
 	}
