@@ -1,6 +1,7 @@
-package middlewares
+package tracing
 
 import (
+	"github.com/harnash/go-middlewares/metrics"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/mocktracer"
 	"github.com/prometheus/client_golang/prometheus"
@@ -12,7 +13,7 @@ import (
 )
 
 func TestBasicTracing(t *testing.T) {
-	httpStats := NewHTTPStats()
+	httpStats := metrics.NewHTTPStats()
 	tracer := mocktracer.New()
 	defer tracer.Reset()
 	err := prometheus.DefaultRegisterer.Register(httpStats)
@@ -33,7 +34,7 @@ func TestBasicTracing(t *testing.T) {
 }
 
 func TestTracingClientHeaders(t *testing.T) {
-	httpStats := NewHTTPStats()
+	httpStats := metrics.NewHTTPStats()
 	tracer := mocktracer.New()
 	defer tracer.Reset()
 	err := prometheus.DefaultRegisterer.Register(httpStats)
@@ -77,7 +78,7 @@ func TestTracingClientHeaders(t *testing.T) {
 }
 
 func TestTracingBaggage(t *testing.T) {
-	httpStats := NewHTTPStats()
+	httpStats := metrics.NewHTTPStats()
 	tracer := mocktracer.New()
 	defer tracer.Reset()
 	err := prometheus.DefaultRegisterer.Register(httpStats)
@@ -101,7 +102,7 @@ func TestTracingBaggage(t *testing.T) {
 }
 
 func TestTracingLogging(t *testing.T) {
-	httpStats := NewHTTPStats()
+	httpStats := metrics.NewHTTPStats()
 	tracer := mocktracer.New()
 	defer tracer.Reset()
 	err := prometheus.DefaultRegisterer.Register(httpStats)
@@ -120,7 +121,7 @@ func TestTracingLogging(t *testing.T) {
 	assert.HTTPSuccess(t, handler.ServeHTTP, "GET", "/", url.Values{})
 	if assert.Len(t, tracer.FinishedSpans(), 1, "did not register any span") {
 		span := tracer.FinishedSpans()[0]
-		if assert.Len(t, span.Logs(), 1,"invalid or missing log record") {
+		if assert.Len(t, span.Logs(), 1, "invalid or missing log record") {
 			logKV := span.Logs()[0]
 			if assert.Len(t, logKV.Fields, 1, "no log fields recorded") {
 				assert.Equal(t, "not_empty", logKV.Fields[0].ValueString, "invalid log value")
@@ -131,7 +132,7 @@ func TestTracingLogging(t *testing.T) {
 }
 
 func TestTracingTag(t *testing.T) {
-	httpStats := NewHTTPStats()
+	httpStats := metrics.NewHTTPStats()
 	tracer := mocktracer.New()
 	err := prometheus.DefaultRegisterer.Register(httpStats)
 	assert.NoError(t, err, "error while registering HTTPStats collector")

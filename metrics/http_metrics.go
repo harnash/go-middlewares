@@ -1,4 +1,4 @@
-package middlewares
+package metrics
 
 import (
 	"net/http"
@@ -100,7 +100,7 @@ func (s HTTPStats) instrumentPrometheus(handlerName string, next http.Handler) h
 		next.ServeHTTP(&d, r)
 
 		labels := prometheus.Labels{
-			"method": r.Method,
+			"method":       r.Method,
 			"handler_name": handlerName,
 		}
 

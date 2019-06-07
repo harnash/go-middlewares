@@ -1,4 +1,4 @@
-package middlewares
+package logger
 
 import (
 	"net/http"
@@ -28,7 +28,7 @@ func TestAccessLog(t *testing.T) {
 
 	err := logger.Sync()
 	assert.NoError(t, err, "error syncing logger")
-	if assert.Equal(t,2, logs.Len(),"log not emitted to a custom logger") {
+	if assert.Equal(t, 2, logs.Len(), "log not emitted to a custom logger") {
 		logEntries := logs.TakeAll()
 		assert.Equal(t, "incoming request", logEntries[0].Message, "no proper access log message found")
 		assert.Equal(t, "response generated", logEntries[1].Message, "no proper access log message found")

@@ -1,7 +1,8 @@
-package middlewares
+package tracing
 
 import (
 	"context"
+	"github.com/harnash/go-middlewares"
 	"net/http"
 	"reflect"
 	"runtime"
@@ -11,15 +12,17 @@ import (
 	"github.com/uber/jaeger-client-go"
 )
 
+type key int
+
 const traceIDKey key = 911
 
 type tracingOptions struct {
-	tracer opentracing.Tracer
-	baggage map[stringBaggageName]string
-	tags map[stringTagName]string
-	logs map[stringLogName]string
+	tracer        opentracing.Tracer
+	baggage       map[stringBaggageName]string
+	tags          map[stringTagName]string
+	logs          map[stringLogName]string
 	handlerPrefix string
-	handlerName string
+	handlerName   string
 }
 
 // TracingOption represents a logger option.
@@ -97,8 +100,8 @@ func (name stringLogName) Set(span opentracing.Span, value string) {
 func newTracingOptions(options ...TracingOption) *tracingOptions {
 	opts := &tracingOptions{
 		baggage: map[stringBaggageName]string{},
-		tags: map[stringTagName]string{},
-		logs: map[stringLogName]string{},
+		tags:    map[stringTagName]string{},
+		logs:    map[stringLogName]string{},
 	}
 
 	for _, o := range options {
@@ -108,7 +111,7 @@ func newTracingOptions(options ...TracingOption) *tracingOptions {
 }
 
 // Traced is a middleware that adds OpenTracing spans to the current request context and sets some sane span tags
-func Traced(options ...TracingOption) Middleware {
+func Traced(options ...TracingOption) middlewares.Middleware {
 	fn := func(h http.Handler) http.Handler {
 		o := newTracingOptions(options...)
 		if len(o.handlerName) == 0 {
@@ -123,7 +126,7 @@ func Traced(options ...TracingOption) Middleware {
 			if err != nil {
 				span = o.tracer.StartSpan(o.handlerPrefix + o.handlerName)
 			} else {
-				span = o.tracer.StartSpan(o.handlerPrefix + o.handlerName, ext.RPCServerOption(spanCtx))
+				span = o.tracer.StartSpan(o.handlerPrefix+o.handlerName, ext.RPCServerOption(spanCtx))
 			}
 
 			ext.HTTPMethod.Set(span, r.Method)

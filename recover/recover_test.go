@@ -1,4 +1,4 @@
-package middlewares
+package recover
 
 import (
 	"github.com/prometheus/client_golang/prometheus"

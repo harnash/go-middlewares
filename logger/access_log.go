@@ -1,6 +1,7 @@
-package middlewares
+package logger
 
 import (
+	"github.com/harnash/go-middlewares"
 	"net/http"
 	"time"
 )
@@ -23,10 +24,10 @@ func (lrw *LoggingResponseWriter) WriteHeader(code int) {
 }
 
 //AccessLog is a simple access-log style logging middleware that will log all incoming request and response info
-func AccessLog() Middleware {
+func AccessLog() middlewares.Middleware {
 	fn := func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			logger := LoggerFromRequest(r)
+			logger := FromRequest(r)
 
 			logger.Info("incoming request")
 

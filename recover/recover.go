@@ -1,6 +1,8 @@
-package middlewares
+package recover
 
 import (
+	"github.com/harnash/go-middlewares"
+	logger2 "github.com/harnash/go-middlewares/logger"
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -32,10 +34,10 @@ func (rc Recover) Collect(in chan<- prometheus.Metric) {
 }
 
 //Instrument will return an http.HandlerFunc wrapper that will catch all panics and return proper HTTP response
-func (rc Recover) Instrument() Middleware {
+func (rc Recover) Instrument() middlewares.Middleware {
 	fn := func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			logger := LoggerFromRequest(r)
+			logger := logger2.FromRequest(r)
 			defer func() {
 				if err := recover(); err != nil {
 					rc.panicCaught.Inc()

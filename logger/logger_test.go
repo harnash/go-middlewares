@@ -1,4 +1,4 @@
-package middlewares
+package logger
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -13,7 +13,7 @@ import (
 
 func TestLoggerInContext(t *testing.T) {
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		logger := LoggerFromRequest(r)
+		logger := FromRequest(r)
 		if assert.NotEmpty(t, logger, "could not get logger from the context") {
 			assert.IsType(t, &zap.SugaredLogger{}, logger, "invalid logger type")
 		}
@@ -27,7 +27,7 @@ func TestLoggerInContext(t *testing.T) {
 
 func TestLoggerWithCustomLogger(t *testing.T) {
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		logger := LoggerFromRequest(r)
+		logger := FromRequest(r)
 		if assert.NotEmpty(t, logger, "could not get logger from the context") {
 			assert.IsType(t, &zap.SugaredLogger{}, logger, "invalid logger type")
 			logger.Debug("some_test_massage_346#@$%^")
@@ -55,7 +55,7 @@ func TestLoggerWithCustomLogger(t *testing.T) {
 
 func TestLoggerWithHeaders(t *testing.T) {
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		logger := LoggerFromRequest(r)
+		logger := FromRequest(r)
 		if assert.NotEmpty(t, logger, "could not get logger from the context") {
 			assert.IsType(t, &zap.SugaredLogger{}, logger, "invalid logger type")
 			logger.Debug("some_test_massage_for_header")
