@@ -16,7 +16,7 @@ type key int
 
 const traceIDKey key = 911
 
-type tracingOptions struct {
+type options struct {
 	tracer        opentracing.Tracer
 	baggage       map[stringBaggageName]string
 	tags          map[stringTagName]string
@@ -25,48 +25,48 @@ type tracingOptions struct {
 	handlerName   string
 }
 
-// TracingOption represents a logger option.
-type TracingOption func(*tracingOptions)
+// Option represents a logger option.
+type Option func(*options)
 
 // WithTracer adds list of headers that should be added to the logger
-func WithTracer(tracer opentracing.Tracer) TracingOption {
-	return TracingOption(func(o *tracingOptions) {
+func WithTracer(tracer opentracing.Tracer) Option {
+	return Option(func(o *options) {
 		o.tracer = tracer
 	})
 }
 
 // WithBaggage will set custom baggage to the span created by middleware
-func WithBaggage(name stringBaggageName, value string) TracingOption {
-	return TracingOption(func(o *tracingOptions) {
+func WithBaggage(name stringBaggageName, value string) Option {
+	return Option(func(o *options) {
 		o.baggage[name] = value
 	})
 }
 
 // WithTags will add custom tags tp the span create by middleware
-func WithTags(name stringTagName, value string) TracingOption {
-	return TracingOption(func(o *tracingOptions) {
+func WithTags(name stringTagName, value string) Option {
+	return Option(func(o *options) {
 		o.tags[name] = value
 	})
 }
 
 // WithLogs will add custom log to the span create by middleware
-func WithLogs(name stringLogName, value string) TracingOption {
-	return TracingOption(func(o *tracingOptions) {
+func WithLogs(name stringLogName, value string) Option {
+	return Option(func(o *options) {
 		o.logs[name] = value
 	})
 }
 
 // WithName will define a handler name (used in span operation name) for the span created by the middleware
 // Default is derived from the function name if http.Handler being wrapped
-func WithName(name string) TracingOption {
-	return TracingOption(func(o *tracingOptions) {
+func WithName(name string) Option {
+	return Option(func(o *options) {
 		o.handlerName = name
 	})
 }
 
 // WithNamePrefix will define prefix for a operation name that is being created by middleware
-func WithNamePrefix(prefix string) TracingOption {
-	return TracingOption(func(o *tracingOptions) {
+func WithNamePrefix(prefix string) Option {
+	return Option(func(o *options) {
 		o.handlerPrefix = prefix
 	})
 }
@@ -97,21 +97,21 @@ func (name stringLogName) Set(span opentracing.Span, value string) {
 }
 
 // newTracingOptions takes functional options and returns options.
-func newTracingOptions(options ...TracingOption) *tracingOptions {
-	opts := &tracingOptions{
+func newTracingOptions(opts ...Option) *options {
+	cfg := &options{
 		baggage: map[stringBaggageName]string{},
 		tags:    map[stringTagName]string{},
 		logs:    map[stringLogName]string{},
 	}
 
-	for _, o := range options {
-		o(opts)
+	for _, o := range opts {
+		o(cfg)
 	}
-	return opts
+	return cfg
 }
 
 // Traced is a middleware that adds OpenTracing spans to the current request context and sets some sane span tags
-func Traced(options ...TracingOption) middlewares.Middleware {
+func Traced(options ...Option) middlewares.Middleware {
 	fn := func(h http.Handler) http.Handler {
 		o := newTracingOptions(options...)
 		if len(o.handlerName) == 0 {
