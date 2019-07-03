@@ -70,9 +70,9 @@ func newLoggerOptions(opts ...Option) *options {
 	return cfg
 }
 
-// LoggerInContext is a middleware that will inject standard logger instance into the context which can be used for
+// InContext is a middleware that will inject standard logger instance into the context which can be used for
 // per-request logging
-func LoggerInContext(options ...Option) middlewares.Middleware {
+func InContext(options ...Option) middlewares.Middleware {
 	fn := func(h http.Handler) http.Handler {
 		o := newLoggerOptions(options...)
 

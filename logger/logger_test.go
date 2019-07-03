@@ -22,7 +22,7 @@ func TestLoggerInContext(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	handler := LoggerInContext()(testHandler)
+	handler := InContext()(testHandler)
 	assert.HTTPSuccess(t, handler.ServeHTTP, "GET", "/", url.Values{}, "handler returned invalid HTTP status code")
 }
 
@@ -43,7 +43,7 @@ func TestLoggerWithCustomLogger(t *testing.T) {
 		return logger.Sugar(), nil
 	})
 
-	handler := LoggerInContext(WithLogger(customLog))(testHandler)
+	handler := InContext(WithLogger(customLog))(testHandler)
 	assert.HTTPSuccess(t, handler.ServeHTTP, "GET", "/", url.Values{}, "handler returned invalid HTTP status code")
 
 	err := logger.Sync()
@@ -71,7 +71,7 @@ func TestLoggerWithHeaders(t *testing.T) {
 		return logger.Sugar(), nil
 	})
 
-	handler := LoggerInContext(WithLogger(customLog), WithHeaders([]string{"goo"}))(testHandler)
+	handler := InContext(WithLogger(customLog), WithHeaders([]string{"goo"}))(testHandler)
 	req, err := http.NewRequest("GET", "http://localhost", nil)
 	assert.NoError(t, err, "could not create custom request")
 	w := httptest.NewRecorder()
@@ -105,7 +105,7 @@ func TestLoggerWithCallback(t *testing.T) {
 		return wrappedLogger.Sugar()
 	})
 
-	handler := LoggerInContext(WithCallback(callback))(testHandler)
+	handler := InContext(WithCallback(callback))(testHandler)
 	assert.HTTPSuccess(t, handler.ServeHTTP, "GET", "/", url.Values{}, "handler returned invalid HTTP status code")
 
 	err := logger.Sync()

@@ -23,7 +23,7 @@ func TestAccessLog(t *testing.T) {
 	})
 
 	handler := AccessLog()(testHandler)
-	handler = LoggerInContext(WithLogger(customLog))(handler)
+	handler = InContext(WithLogger(customLog))(handler)
 	assert.HTTPSuccess(t, handler.ServeHTTP, "GET", "/", url.Values{}, "handler returned invalid HTTP status code")
 
 	err := logger.Sync()
