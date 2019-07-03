@@ -2,10 +2,11 @@ package tracing
 
 import (
 	"context"
-	"github.com/harnash/go-middlewares"
 	"net/http"
 	"reflect"
 	"runtime"
+
+	"github.com/harnash/go-middlewares"
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"

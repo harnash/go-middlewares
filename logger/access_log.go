@@ -1,9 +1,10 @@
 package logger
 
 import (
-	"github.com/harnash/go-middlewares"
 	"net/http"
 	"time"
+
+	"github.com/harnash/go-middlewares"
 )
 
 //LoggingResponseWriter is a wrapper around ResponseWriter used to capture HTTP status code of responses

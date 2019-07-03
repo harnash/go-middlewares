@@ -3,9 +3,10 @@ package logger
 import (
 	"context"
 	"fmt"
-	"github.com/harnash/go-middlewares"
 	"net/http"
 	"strings"
+
+	"github.com/harnash/go-middlewares"
 
 	"go.uber.org/zap"
 )
@@ -17,9 +18,13 @@ const loggerIDKey key = 119
 // LogGetter is function that allows injecting custom logger into the middleware
 type LogGetter func() (*zap.SugaredLogger, error)
 
+// LogCallback defines function that can modify logger properties for all requests
+type LogCallback func(log *zap.SugaredLogger, r *http.Request) *zap.SugaredLogger
+
 type options struct {
 	headers   []string
 	logGetter LogGetter
+	callback  LogCallback
 }
 
 // DefaultLogGetter defines default log getter for middleware
@@ -33,6 +38,13 @@ func DefaultLogGetter() (*zap.SugaredLogger, error) {
 
 // Option represents a logger option.
 type Option func(*options)
+
+// WithCallback sets callback for the logger
+func WithCallback(callback LogCallback) Option {
+	return Option(func(o *options) {
+		o.callback = callback
+	})
+}
 
 // WithHeaders adds list of headers that should be added to the logger
 func WithHeaders(headers []string) Option {
@@ -74,6 +86,10 @@ func LoggerInContext(options ...Option) middlewares.Middleware {
 				if val := r.Header.Get(headerName); len(val) > 0 {
 					logger = logger.With("request_header_"+strings.ToLower(headerName), val)
 				}
+			}
+
+			if o.callback != nil {
+				logger = o.callback(logger, r)
 			}
 
 			h.ServeHTTP(w, r.WithContext(AddLoggerToContext(r.Context(), logger)))

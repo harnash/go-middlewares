@@ -1,9 +1,10 @@
 package recover
 
 import (
+	"net/http"
+
 	"github.com/harnash/go-middlewares"
 	logger2 "github.com/harnash/go-middlewares/logger"
-	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
