@@ -14,3 +14,13 @@ func Use(h http.Handler, middlewares ...Middleware) http.Handler {
 	}
 	return h
 }
+
+//UseFunc will apply set of middlewares to a given http.HandlerFunc
+func UseFunc(h http.HandlerFunc, middlewares ...Middleware) http.Handler {
+	var res http.Handler
+	for _, middleware := range middlewares {
+		res = middleware(h)
+	}
+
+	return res
+}

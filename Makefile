@@ -7,6 +7,10 @@ else
 	GO_PATH := ${GOPATH}
 endif
 
+ifeq ($(GO_PATH),)
+    GO_PATH := $(shell go env GOPATH)
+endif
+
 # Remove the trailing slash
 GO_PATH := $(patsubst %/,%,$(GO_PATH))
 
