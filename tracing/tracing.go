@@ -31,45 +31,45 @@ type Option func(*options)
 
 // WithTracer adds list of headers that should be added to the logger
 func WithTracer(tracer opentracing.Tracer) Option {
-	return Option(func(o *options) {
+	return func(o *options) {
 		o.tracer = tracer
-	})
+	}
 }
 
 // WithBaggage will set custom baggage to the span created by middleware
 func WithBaggage(name stringBaggageName, value string) Option {
-	return Option(func(o *options) {
+	return func(o *options) {
 		o.baggage[name] = value
-	})
+	}
 }
 
 // WithTags will add custom tags tp the span create by middleware
 func WithTags(name stringTagName, value string) Option {
-	return Option(func(o *options) {
+	return func(o *options) {
 		o.tags[name] = value
-	})
+	}
 }
 
 // WithLogs will add custom log to the span create by middleware
 func WithLogs(name stringLogName, value string) Option {
-	return Option(func(o *options) {
+	return func(o *options) {
 		o.logs[name] = value
-	})
+	}
 }
 
 // WithName will define a handler name (used in span operation name) for the span created by the middleware
 // Default is derived from the function name if http.Handler being wrapped
 func WithName(name string) Option {
-	return Option(func(o *options) {
+	return func(o *options) {
 		o.handlerName = name
-	})
+	}
 }
 
 // WithNamePrefix will define prefix for a operation name that is being created by middleware
 func WithNamePrefix(prefix string) Option {
-	return Option(func(o *options) {
+	return func(o *options) {
 		o.handlerPrefix = prefix
-	})
+	}
 }
 
 type stringBaggageName string

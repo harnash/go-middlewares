@@ -11,12 +11,11 @@ import (
 )
 
 func TestRecovery(t *testing.T) {
-	recovery := NewRecover()
-	err := prometheus.DefaultRegisterer.Register(recovery)
-	assert.NoError(t, err, "error while registering Recover collector")
-	defer prometheus.DefaultRegisterer.Unregister(recovery)
+	err := RegisterDefaultMetrics(prometheus.DefaultRegisterer)
+	assert.NoError(t, err, "error while registering panic stats collector")
+	defer UnregisterDefaultMetrics(prometheus.DefaultRegisterer)
 
-	handler := recovery.Instrument()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { panic("doh!") }))
+	handler := PanicCatch()(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { panic("doh!") }))
 
 	// initially all http stats should be zero
 	assert.HTTPBodyContains(t, promhttp.Handler().ServeHTTP, "GET", "/", url.Values{}, `go_panics_caught_total 0`, "go_panics_caught_total did not increment")
