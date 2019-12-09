@@ -11,12 +11,11 @@ import (
 )
 
 func TestHttpStatsTotalRequests(t *testing.T) {
-	httpStats := NewHTTPStats()
-	err := prometheus.DefaultRegisterer.Register(httpStats)
+	err := RegisterDefaultMetrics(prometheus.DefaultRegisterer)
 	assert.NoError(t, err, "error while registering HTTPStats collector")
-	defer prometheus.DefaultRegisterer.Unregister(httpStats)
+	defer UnregisterDefaultMetrics(prometheus.DefaultRegisterer)
 
-	promHandler := httpStats.Instrument("test_handler", promhttp.Handler())
+	promHandler := Measured(WithName("test_handler"))(promhttp.Handler())
 
 	// initially all http stats should be zero
 	assert.HTTPBodyNotContains(t, promHandler.ServeHTTP, "GET", "/", url.Values{}, `http_requests_total{code="200",method="get"}`, "http_requests_total metric is not zero")
@@ -25,12 +24,11 @@ func TestHttpStatsTotalRequests(t *testing.T) {
 }
 
 func TestHttpStats4xx(t *testing.T) {
-	httpStats := NewHTTPStats()
-	err := prometheus.DefaultRegisterer.Register(httpStats)
+	err := RegisterDefaultMetrics(prometheus.DefaultRegisterer)
 	assert.NoError(t, err, "error while registering HTTPStats collector")
-	defer prometheus.DefaultRegisterer.Unregister(httpStats)
+	defer UnregisterDefaultMetrics(prometheus.DefaultRegisterer)
 
-	customHandler := httpStats.Instrument("error_handler", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusForbidden) }))
+	customHandler := Measured(WithName("error_handler"))(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusForbidden) }))
 
 	assert.HTTPBodyNotContains(t, promhttp.Handler().ServeHTTP, "GET", "/", url.Values{}, `http_requests_total{code="403",method="get"}`, "http_requests_total is not zero for 403 statuses")
 	assert.HTTPError(t, customHandler.ServeHTTP, "GET", "/", url.Values{}, "custom handler did not return error status")
