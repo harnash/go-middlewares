@@ -12,7 +12,7 @@ import (
 
 func TestHttpStatsTotalRequests(t *testing.T) {
 	err := RegisterDefaultMetrics(prometheus.DefaultRegisterer)
-	assert.NoError(t, err, "error while registering HTTPStats collector")
+	assert.NoError(t, err, "error while registering http stats collector")
 	defer UnregisterDefaultMetrics(prometheus.DefaultRegisterer)
 
 	promHandler := Measured(WithName("test_handler"))(promhttp.Handler())
@@ -25,7 +25,7 @@ func TestHttpStatsTotalRequests(t *testing.T) {
 
 func TestHttpStats4xx(t *testing.T) {
 	err := RegisterDefaultMetrics(prometheus.DefaultRegisterer)
-	assert.NoError(t, err, "error while registering HTTPStats collector")
+	assert.NoError(t, err, "error while registering http stats collector")
 	defer UnregisterDefaultMetrics(prometheus.DefaultRegisterer)
 
 	customHandler := Measured(WithName("error_handler"))(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusForbidden) }))

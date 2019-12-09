@@ -9,7 +9,7 @@ import (
 )
 
 type options struct {
-	metrics     HTTPStatsMetrics
+	metrics     Metrics
 	handlerName string
 }
 
@@ -22,7 +22,7 @@ type statusRecorder struct {
 }
 
 //WithMetrics sets custom metric collector/container for http metrics
-func WithMetrics(metrics HTTPStatsMetrics) Option {
+func WithMetrics(metrics Metrics) Option {
 	return func(o *options) {
 		o.metrics = metrics
 	}
@@ -41,8 +41,8 @@ func (rec *statusRecorder) WriteHeader(code int) {
 	rec.ResponseWriter.WriteHeader(code)
 }
 
-//HTTPStatsMetrics defines interface for custom metric collector/container
-type HTTPStatsMetrics interface {
+//Metrics defines interface for custom metric collector/container
+type Metrics interface {
 	prometheus.Collector
 	GetTotalRequests() *prometheus.CounterVec
 	GetDuration() *prometheus.HistogramVec
@@ -53,8 +53,8 @@ type HTTPStatsMetrics interface {
 	GetHandlerStatuses() *prometheus.CounterVec
 }
 
-//DefaultMetrics holds all the metrics regarding HTTP requests
-type DefaultMetrics struct {
+//defaultMetrics holds all the metrics regarding HTTP requests
+type defaultMetrics struct {
 	totalRequests   *prometheus.CounterVec
 	duration        *prometheus.HistogramVec
 	responseSize    *prometheus.HistogramVec
@@ -64,47 +64,47 @@ type DefaultMetrics struct {
 	handlerStatuses *prometheus.CounterVec
 }
 
-var defaultMetrics = newDefaultMetrics()
+var basicMetrics = newDefaultMetrics()
 
 //GetTotalRequests return metric that will measure total number of requests
-func (s DefaultMetrics) GetTotalRequests() *prometheus.CounterVec {
+func (s defaultMetrics) GetTotalRequests() *prometheus.CounterVec {
 	return s.totalRequests
 }
 
 //GetDuration return metric that will measure the total request duration
-func (s DefaultMetrics) GetDuration() *prometheus.HistogramVec {
+func (s defaultMetrics) GetDuration() *prometheus.HistogramVec {
 	return s.duration
 }
 
 //GetResponseSize return metric that is tracking size of the responses
-func (s DefaultMetrics) GetResponseSize() *prometheus.HistogramVec {
+func (s defaultMetrics) GetResponseSize() *prometheus.HistogramVec {
 	return s.responseSize
 }
 
 //GetRequestSize return metric that tracks the size of the requests
-func (s DefaultMetrics) GetRequestSize() *prometheus.HistogramVec {
+func (s defaultMetrics) GetRequestSize() *prometheus.HistogramVec {
 	return s.requestSize
 }
 
 //GetTimeToWrite return metric that tracks time to first write
-func (s DefaultMetrics) GetTimeToWrite() *prometheus.HistogramVec {
+func (s defaultMetrics) GetTimeToWrite() *prometheus.HistogramVec {
 	return s.timeToWrite
 }
 
 //GetHandlerDuration will return metric which tracks how long it takes to handle requests (pre handler)
-func (s DefaultMetrics) GetHandlerDuration() *prometheus.HistogramVec {
+func (s defaultMetrics) GetHandlerDuration() *prometheus.HistogramVec {
 	return s.handlerDuration
 }
 
 //GetHandlerStatuses will return metric that will track response statuses for a given handler
-func (s DefaultMetrics) GetHandlerStatuses() *prometheus.CounterVec {
+func (s defaultMetrics) GetHandlerStatuses() *prometheus.CounterVec {
 	return s.handlerStatuses
 }
 
-// newHTTPStatsOptions takes functional options and returns options.
-func newHTTPStatsOptions(opts ...Option) *options {
+// newOptions takes functional options and returns options.
+func newOptions(opts ...Option) *options {
 	cfg := &options{
-		metrics: defaultMetrics,
+		metrics: basicMetrics,
 		handlerName: "",
 	}
 
@@ -120,7 +120,7 @@ func newHTTPStatsOptions(opts ...Option) *options {
 }
 
 //newDefaultMetrics create new HTTPStats object and initializes metrics
-func newDefaultMetrics() DefaultMetrics {
+func newDefaultMetrics() Metrics {
 	reqCounter := prometheus.NewCounterVec(prometheus.CounterOpts{
 		Name: "http_requests_total",
 		Help: "number of requests",
@@ -156,13 +156,13 @@ func newDefaultMetrics() DefaultMetrics {
 		Help: "count number of responses per status bucket (2xx, 3xx, 4xx, 5xx)",
 	}, []string{"method", "status_bucket", "handler_name"})
 
-	return DefaultMetrics{totalRequests: reqCounter, duration: duration, responseSize: responseSize,
+	return defaultMetrics{totalRequests: reqCounter, duration: duration, responseSize: responseSize,
 		requestSize: requestSize, timeToWrite: timeToWrite, handlerDuration: handlerDuration,
 		handlerStatuses: handlerStatuses}
 }
 
 // Describe implements prometheus Collector interface.
-func (s DefaultMetrics) Describe(in chan<- *prometheus.Desc) {
+func (s defaultMetrics) Describe(in chan<- *prometheus.Desc) {
 	s.duration.Describe(in)
 	s.totalRequests.Describe(in)
 	s.requestSize.Describe(in)
@@ -173,7 +173,7 @@ func (s DefaultMetrics) Describe(in chan<- *prometheus.Desc) {
 }
 
 // Collect implements prometheus Collector interface.
-func (s DefaultMetrics) Collect(in chan<- prometheus.Metric) {
+func (s defaultMetrics) Collect(in chan<- prometheus.Metric) {
 	s.duration.Collect(in)
 	s.totalRequests.Collect(in)
 	s.requestSize.Collect(in)
@@ -186,20 +186,20 @@ func (s DefaultMetrics) Collect(in chan<- prometheus.Metric) {
 //RegisterDefaultMetrics will register default HttpStats metrics instance in Prometheus. This is only needed if
 // any handlers are instrumented with default metrics (not overridden by WithMetrics() option)
 func RegisterDefaultMetrics(registerer prometheus.Registerer) error {
-	return registerer.Register(defaultMetrics)
+	return registerer.Register(basicMetrics)
 }
 
 //UnregisterDefaultMetrics is a companion function to RegisterDefaultMetrics and must be called if RegisterDefaultMetrics
 // is used to cleanup the metrics in Prometheus
 func UnregisterDefaultMetrics(registerer prometheus.Registerer) {
-	registerer.Unregister(defaultMetrics)
+	registerer.Unregister(basicMetrics)
 }
 
 //Measured will instrument any http.HandlerFunc with custom metrics (with custom label "handler_name")
 //This is useful for gathering per-handler metrics to implement Apdex-like alerting
 func Measured(options ...Option) middlewares.Middleware {
 	fn := func(h http.Handler) http.Handler {
-		o := newHTTPStatsOptions(options...)
+		o := newOptions(options...)
 
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			wrapped := promhttp.InstrumentHandlerResponseSize(o.metrics.GetResponseSize(), h)

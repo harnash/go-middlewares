@@ -17,7 +17,7 @@ func TestBasicTracing(t *testing.T) {
 	tracer := mocktracer.New()
 	defer tracer.Reset()
 	err := metrics.RegisterDefaultMetrics(prometheus.DefaultRegisterer)
-	assert.NoError(t, err, "error while registering HTTPStats collector")
+	assert.NoError(t, err, "error while registering http stats collector")
 	defer metrics.UnregisterDefaultMetrics(prometheus.DefaultRegisterer)
 
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +37,7 @@ func TestTracingClientHeaders(t *testing.T) {
 	tracer := mocktracer.New()
 	defer tracer.Reset()
 	err := metrics.RegisterDefaultMetrics(prometheus.DefaultRegisterer)
-	assert.NoError(t, err, "error while registering HTTPStats collector")
+	assert.NoError(t, err, "error while registering http stats collector")
 	defer metrics.UnregisterDefaultMetrics(prometheus.DefaultRegisterer)
 
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -80,7 +80,7 @@ func TestTracingBaggage(t *testing.T) {
 	tracer := mocktracer.New()
 	defer tracer.Reset()
 	err := metrics.RegisterDefaultMetrics(prometheus.DefaultRegisterer)
-	assert.NoError(t, err, "error while registering HTTPStats collector")
+	assert.NoError(t, err, "error while registering http stats collector")
 	defer metrics.UnregisterDefaultMetrics(prometheus.DefaultRegisterer)
 
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -103,7 +103,7 @@ func TestTracingLogging(t *testing.T) {
 	tracer := mocktracer.New()
 	defer tracer.Reset()
 	err := metrics.RegisterDefaultMetrics(prometheus.DefaultRegisterer)
-	assert.NoError(t, err, "error while registering HTTPStats collector")
+	assert.NoError(t, err, "error while registering http stats collector")
 	defer metrics.UnregisterDefaultMetrics(prometheus.DefaultRegisterer)
 
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -131,7 +131,7 @@ func TestTracingLogging(t *testing.T) {
 func TestTracingTag(t *testing.T) {
 	tracer := mocktracer.New()
 	err := metrics.RegisterDefaultMetrics(prometheus.DefaultRegisterer)
-	assert.NoError(t, err, "error while registering HTTPStats collector")
+	assert.NoError(t, err, "error while registering http stats collector")
 	defer metrics.UnregisterDefaultMetrics(prometheus.DefaultRegisterer)
 
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
