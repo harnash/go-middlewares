@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/harnash/go-middlewares/metrics"
+	"github.com/harnash/go-middlewares/http_metrics"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/mocktracer"
 	"github.com/prometheus/client_golang/prometheus"

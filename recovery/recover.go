@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/harnash/go-middlewares"
-	logger2 "github.com/harnash/go-middlewares/logger"
+	logger2 "github.com/harnash/go-middlewares/logging"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
