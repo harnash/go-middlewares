@@ -53,7 +53,7 @@ else
 	VERSION_GIT := $(shell sh -c 'git describe --always --tags --abbrev=7')
 endif
 ifeq ($(VERSION_GIT),)
-	VERSION_GIT = "v0.0.1"
+	VERSION_GIT = "v0.0.2"
 endif
 
 ifeq ($(OS),Windows_NT)
