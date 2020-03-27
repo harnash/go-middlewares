@@ -16,9 +16,9 @@ import (
 func TestBasicTracing(t *testing.T) {
 	tracer := mocktracer.New()
 	defer tracer.Reset()
-	err := metrics.RegisterDefaultMetrics(prometheus.DefaultRegisterer)
+	err := http_metrics.RegisterDefaultMetrics(prometheus.DefaultRegisterer)
 	assert.NoError(t, err, "error while registering http stats collector")
-	defer metrics.UnregisterDefaultMetrics(prometheus.DefaultRegisterer)
+	defer http_metrics.UnregisterDefaultMetrics(prometheus.DefaultRegisterer)
 
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		span := opentracing.SpanFromContext(r.Context())
@@ -36,9 +36,9 @@ func TestBasicTracing(t *testing.T) {
 func TestTracingClientHeaders(t *testing.T) {
 	tracer := mocktracer.New()
 	defer tracer.Reset()
-	err := metrics.RegisterDefaultMetrics(prometheus.DefaultRegisterer)
+	err := http_metrics.RegisterDefaultMetrics(prometheus.DefaultRegisterer)
 	assert.NoError(t, err, "error while registering http stats collector")
-	defer metrics.UnregisterDefaultMetrics(prometheus.DefaultRegisterer)
+	defer http_metrics.UnregisterDefaultMetrics(prometheus.DefaultRegisterer)
 
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		span := opentracing.SpanFromContext(r.Context())
@@ -79,9 +79,9 @@ func TestTracingClientHeaders(t *testing.T) {
 func TestTracingBaggage(t *testing.T) {
 	tracer := mocktracer.New()
 	defer tracer.Reset()
-	err := metrics.RegisterDefaultMetrics(prometheus.DefaultRegisterer)
+	err := http_metrics.RegisterDefaultMetrics(prometheus.DefaultRegisterer)
 	assert.NoError(t, err, "error while registering http stats collector")
-	defer metrics.UnregisterDefaultMetrics(prometheus.DefaultRegisterer)
+	defer http_metrics.UnregisterDefaultMetrics(prometheus.DefaultRegisterer)
 
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		span := opentracing.SpanFromContext(r.Context())
@@ -102,9 +102,9 @@ func TestTracingBaggage(t *testing.T) {
 func TestTracingLogging(t *testing.T) {
 	tracer := mocktracer.New()
 	defer tracer.Reset()
-	err := metrics.RegisterDefaultMetrics(prometheus.DefaultRegisterer)
+	err := http_metrics.RegisterDefaultMetrics(prometheus.DefaultRegisterer)
 	assert.NoError(t, err, "error while registering http stats collector")
-	defer metrics.UnregisterDefaultMetrics(prometheus.DefaultRegisterer)
+	defer http_metrics.UnregisterDefaultMetrics(prometheus.DefaultRegisterer)
 
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		span := opentracing.SpanFromContext(r.Context())
@@ -130,9 +130,9 @@ func TestTracingLogging(t *testing.T) {
 
 func TestTracingTag(t *testing.T) {
 	tracer := mocktracer.New()
-	err := metrics.RegisterDefaultMetrics(prometheus.DefaultRegisterer)
+	err := http_metrics.RegisterDefaultMetrics(prometheus.DefaultRegisterer)
 	assert.NoError(t, err, "error while registering http stats collector")
-	defer metrics.UnregisterDefaultMetrics(prometheus.DefaultRegisterer)
+	defer http_metrics.UnregisterDefaultMetrics(prometheus.DefaultRegisterer)
 
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		span := opentracing.SpanFromContext(r.Context())

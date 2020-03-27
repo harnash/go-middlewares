@@ -1,4 +1,4 @@
-package metrics
+package http_metrics
 
 import (
 	"net/http"
